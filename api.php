@@ -39,8 +39,8 @@ class api
     {
         include_once(INCLUDE_ROOT."WechatAuth.php");
         $wx = new WechatAuth(); //初始化类
-        $wx->appId = 'wx42b2fa7fa15c9d49'; //公众号appId
-        $wx->appSecret = 'beba9b413ddc6b80f0574c85b192868e'; //公众号appSecret
+        $wx->appId = '公众号appId'; //公众号appId
+        $wx->appSecret = '公众号appSecret'; //公众号appSecret
         $wx->code = $param['code']; //微信小程序登录时获取的code
         $arr = $wx->authIndex(3);//调用函数
         $arr = json_decode($arr,true);
