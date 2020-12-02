@@ -5,7 +5,8 @@ class controller
 {
     // 设置能访问的域名
     static public $originarr = [
-        'WEB端的业务域名'
+        'http://127.0.0.1',
+        'http://web.applet.2free.cn'
     ];
 
     static public function setHeader()
@@ -70,10 +71,10 @@ class controller
         if($_POST['type']==1){
             $path = 'news/newsIndexPhoto/';
         }if($_POST['type']==2){
-            $path = 'news/navigatorPhoto/';
-        }else{
-            $path = 'news/newsPhoto/';
-        }
+        $path = 'news/navigatorPhoto/';
+    }else{
+        $path = 'news/newsPhoto/';
+    }
         $upload = uploadPhoto($_FILES['file'],$path);
         $siteurl = ($_SERVER['SERVER_PORT'] == '443' ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].'/file/'.$path;
         if($upload){
@@ -127,6 +128,14 @@ class controller
     private function articleEdit($param)
     {
         global $DB;
+        //先删除旧图片数据
+        if($param['newsLogo']){
+            $list[0] = $DB->query("SELECT * FROM oreo_article where id = {$param['news_id']}")->fetch(PDO::FETCH_ASSOC);
+            if($list[0]['title_img']!=$param['newsLogo']){
+                $result = substr($list[0]['title_img'],strripos($list[0]['title_img'],"/file/")+1);
+                unlink(ROOT.'/'.$result);//删除
+            }
+        }
         //写入数据库
         $DB->exec("update `oreo_article` set `title`='{$param['news_title']}',`text`='{$param['news_text']}',`title_img`='{$param['newsLogo']}',`status`='{$param['status']}' where `id`='{$param['news_id']}'");
         return getJson(200,"编辑成功");
@@ -136,6 +145,10 @@ class controller
     private function articleDel($param)
     {
         global $DB;
+        //先删除旧图片数据
+        $list[0] = $DB->query("SELECT * FROM oreo_article where id = {$param['news_id']}")->fetch(PDO::FETCH_ASSOC);
+        $result = substr($list[0]['title_img'],strripos($list[0]['title_img'],"/file/")+1);
+        unlink(ROOT.'/'.$result);//删除
         $DB->exec("DELETE FROM oreo_article WHERE id='{$param['news_id']}' ");
         return getJson(200,"删除成功");
     }
@@ -165,7 +178,15 @@ class controller
     {
         $time = date('Y-m-d H:i:s');
         global $DB;
-        $DB->exec("update `oreo_navigator` set `image_src`='{$param['image_src']}',`article_id`='{$param['article_id']}',`status`='{$param['status']}' where `id`='{$param['navigator_id']}'");
+        //先删除旧图片数据
+        if($param['image_src']){
+            $list[0] = $DB->query("SELECT * FROM oreo_navigator where id = {$param['navigator_id']}")->fetch(PDO::FETCH_ASSOC);
+            if($list[0]['image_src']!=$param['image_src']){
+                $result = substr($list[0]['image_src'],strripos($list[0]['image_src'],"/file/")+1);
+                unlink(ROOT.'/'.$result);//删除
+            }
+        }
+        $DB->exec("update `oreo_navigator` set `image_src`='{$param['image_src']}',`article_id`='{$param['article_id']}',`status`='{$param['status']}',`add_time`='{$time}' where `id`='{$param['navigator_id']}'");
         return getJson(200,"编辑成功");
     }
 
@@ -173,6 +194,10 @@ class controller
     private function rotationDel($param)
     {
         global $DB;
+        //首先获取
+        $list[0] = $DB->query("SELECT * FROM oreo_navigator where id = {$param['navigator_id']}")->fetch(PDO::FETCH_ASSOC);
+        $result = substr($list[0]['image_src'],strripos($list[0]['image_src'],"/file/")+1);
+        unlink(ROOT.'/'.$result);//删除
         $DB->exec("DELETE FROM oreo_navigator WHERE id='{$param['navigator_id']}' ");
         return getJson(200,"删除成功");
     }
