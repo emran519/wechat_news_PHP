@@ -6,7 +6,7 @@ class controller
     // 设置能访问的域名
     static public $originarr = [
         'http://127.0.0.1',
-        'http://web.applet.2free.cn'
+        '您的WEB端业务域名'
     ];
 
     static public function setHeader()
